@@ -8,6 +8,9 @@ interface QueueData {
   name?: string;
   color?: string;
   greetingMessage?: string;
+  startWork?: string;
+  endWork?: string;
+  absenceMessage?: string;
 }
 
 const UpdateQueueService = async (
@@ -27,7 +30,6 @@ const UpdateQueueService = async (
             const queueWithSameName = await Queue.findOne({
               where: { name: value, id: { [Op.not]: queueId } }
             });
-
             return !queueWithSameName;
           }
           return true;

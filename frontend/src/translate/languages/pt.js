@@ -182,22 +182,33 @@ const messages = {
         },
         success: "Resposta Rápida salva com sucesso.",
       },
-      queueModal: {
-        title: {
-          add: "Adicionar fila",
-          edit: "Editar fila",
-        },
-        form: {
-          name: "Nome",
-          color: "Cor",
-          greetingMessage: "Mensagem de saudação",
-        },
-        buttons: {
-          okAdd: "Adicionar",
-          okEdit: "Salvar",
-          cancel: "Cancelar",
-        },
-      },
+queueModal: {
+  title: {
+    add: "Adicionar fila",
+    edit: "Editar fila",
+  },
+  form: {
+    name: "Nome",
+    color: "Cor",
+    greetingMessage: "Mensagem de saudação",
+    startWork: "Abertura",
+    endWork: "Fechamento",
+    absenceMessage: "Mensagem de ausência",
+    weekDays: "Dias da semana",
+    monday: "Segunda-feira",
+    tuesday: "Terça-feira",
+    wednesday: "Quarta-feira",
+    thursday: "Quinta-feira",
+    friday: "Sexta-feira",
+    saturday: "Sábado",
+    sunday: "Domingo",
+  },
+  buttons: {
+    okAdd: "Adicionar",
+    okEdit: "Salvar",
+    cancel: "Cancelar",
+  },
+},
       userModal: {
         title: {
           add: "Adicionar usuário",
@@ -302,23 +313,25 @@ const messages = {
       notifications: {
         noTickets: "Nenhuma notificação.",
       },
-      queues: {
-        title: "Filas",
-        table: {
-          name: "Nome",
-          color: "Cor",
-          greeting: "Mensagem de saudação",
-          actions: "Ações",
-        },
-        buttons: {
-          add: "Adicionar fila",
-        },
-        confirmationModal: {
-          deleteTitle: "Excluir",
-          deleteMessage:
-            "Você tem certeza? Essa ação não pode ser revertida! Os tickets dessa fila continuarão existindo, mas não terão mais nenhuma fila atribuída.",
-        },
-      },
+queues: {
+  title: "Filas",
+  table: {
+    name: "Nome",
+    color: "Cor",
+    greeting: "Mensagem de saudação",
+    startWork: "Abertura",
+    endWork: "Fechamento",
+    actions: "Ações",
+  },
+  buttons: {
+    add: "Adicionar fila",
+  },
+  confirmationModal: {
+    deleteTitle: "Excluir",
+    deleteMessage:
+      "Você tem certeza? Essa ação não pode ser revertida! Os tickets dessa fila continuarão existindo, mas não terão mais nenhuma fila atribuída.",
+  },
+},
       queueSelect: {
         inputLabel: "Filas",
       },

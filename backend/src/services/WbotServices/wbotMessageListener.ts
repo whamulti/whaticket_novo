@@ -63,6 +63,43 @@ const verifyQuotedMessage = async (
   return quotedMsg;
 };
 
+// Função auxiliar para verificar se deve processar baseado no dia da semana
+const checkWorkDay = (queue: any): { shouldProcess: boolean, shouldSendAbsence: boolean } => {
+  console.log("🔍 DEBUG checkWorkDay:");
+  console.log("  - Queue:", queue.name);
+  console.log("  - workDays:", JSON.stringify(queue.workDays));
+  console.log("  - Tipo:", typeof queue.workDays);
+  
+  if (!queue.workDays) {
+    console.log("  - Sem workDays configurado, processa normalmente");
+    return { shouldProcess: true, shouldSendAbsence: false };
+  }
+  
+  // Parse do JSON se vier como string
+  let workDaysObj = queue.workDays;
+  if (typeof queue.workDays === 'string') {
+    try {
+      workDaysObj = JSON.parse(queue.workDays);
+      console.log("  - Convertido de string para objeto");
+    } catch (e) {
+      console.log("  - Erro ao fazer parse, processa normalmente");
+      return { shouldProcess: true, shouldSendAbsence: false };
+    }
+  }
+  
+  const currentDay = new Date().getDay().toString();
+  console.log("  - Dia atual:", currentDay);
+  console.log("  - Dia marcado?", workDaysObj[currentDay]);
+  
+  // Se o dia NÃO está marcado, envia ausência
+  if (workDaysObj[currentDay] !== true) {
+    console.log("  - ❌ Dia NÃO marcado, envia ausência");
+    return { shouldProcess: false, shouldSendAbsence: true };
+  }
+  
+  console.log("  - ✅ Dia marcado, processa normalmente");
+  return { shouldProcess: true, shouldSendAbsence: false };
+};
 
 // generate random id string for file names, function got from: https://stackoverflow.com/a/1349426/1851801
 function makeRandomId(length: number) {
@@ -177,10 +214,61 @@ const verifyQueue = async (
   const { queues, greetingMessage } = await ShowWhatsAppService(wbot.id!);
 
   if (queues.length === 1) {
+    const queue = queues[0];
+    
+    // Verifica se o dia da semana permite atendimento
+    const workDayCheck = checkWorkDay(queue);
+    
+    // Se o dia NÃO está marcado, envia ausência
+    if (workDayCheck.shouldSendAbsence) {
+      if (queue.absenceMessage) {
+        const body = formatBody(`\u200e${queue.absenceMessage}\n_0 - Voltar_`, contact);
+        const sentMessage = await wbot.sendMessage(`${contact.number}@c.us`, body);
+        await verifyMessage(sentMessage, ticket, contact);
+      }
+      return;
+    }
+
+    // Se o dia está marcado, verifica horário (se configurado)
+    if (queue.startWork && queue.endWork) {
+      const Hr = new Date();
+      const hh: number = Hr.getHours() * 60 * 60;
+      const mm: number = Hr.getMinutes() * 60;
+      const hora = hh + mm;
+
+      const inicio: string = queue.startWork;
+      const hhinicio = Number(inicio.split(":")[0]) * 60 * 60;
+      const mminicio = Number(inicio.split(":")[1]) * 60;
+      const horainicio = hhinicio + mminicio;
+
+      const termino: string = queue.endWork;
+      const hhtermino = Number(termino.split(":")[0]) * 60 * 60;
+      const mmtermino = Number(termino.split(":")[1]) * 60;
+      const horatermino = hhtermino + mmtermino;
+
+      if (hora < horainicio || hora > horatermino) {
+        // Fora do horário - envia mensagem de ausência
+        if (queue.absenceMessage) {
+          const body = formatBody(`\u200e${queue.absenceMessage}\n_0 - Voltar_`, contact);
+          const sentMessage = await wbot.sendMessage(`${contact.number}@c.us`, body);
+          await verifyMessage(sentMessage, ticket, contact);
+        }
+        return;
+      }
+    }
+    
+    // Dentro do horário - atribui a fila e envia mensagem de saudação
     await UpdateTicketService({
-      ticketData: { queueId: queues[0].id },
+      ticketData: { queueId: queue.id },
       ticketId: ticket.id
     });
+
+    // Envia mensagem de saudação
+    if (queue.greetingMessage) {
+      const body = formatBody(`\u200e${queue.greetingMessage}`, contact);
+      const sentMessage = await wbot.sendMessage(`${contact.number}@c.us`, body);
+      await verifyMessage(sentMessage, ticket, contact);
+    }
 
     return;
   }
@@ -190,6 +278,53 @@ const verifyQueue = async (
   const choosenQueue = queues[+selectedOption - 1];
 
   if (choosenQueue) {
+    // Verifica se o dia da semana permite atendimento
+    const workDayCheck = checkWorkDay(choosenQueue);
+    
+    // Se o dia NÃO está marcado, envia ausência
+    if (workDayCheck.shouldSendAbsence) {
+      const body = formatBody(`\u200e${choosenQueue.absenceMessage}\n_0 - Voltar_`, contact);
+      const sentMessage = await wbot.sendMessage(`${contact.number}@c.us`, body);
+      await verifyMessage(sentMessage, ticket, contact);
+      return;
+    }
+    
+    // Se o dia está marcado, verifica horário (se configurado)
+    if (choosenQueue.startWork && choosenQueue.endWork) {
+      const Hr = new Date();
+
+      const hh: number = Hr.getHours() * 60 * 60;
+      const mm: number = Hr.getMinutes() * 60;
+      const hora = hh + mm;
+
+      const inicio: string = choosenQueue.startWork;
+      const hhinicio = Number(inicio.split(":")[0]) * 60 * 60;
+      const mminicio = Number(inicio.split(":")[1]) * 60;
+      const horainicio = hhinicio + mminicio;
+
+      const termino: string = choosenQueue.endWork;
+      const hhtermino = Number(termino.split(":")[0]) * 60 * 60;
+      const mmtermino = Number(termino.split(":")[1]) * 60;
+      const horatermino = hhtermino + mmtermino;
+
+      if (hora < horainicio || hora > horatermino) {
+        const body = formatBody(`\u200e${choosenQueue.absenceMessage}\n_0 - Voltar_`, contact);
+
+        const sentMessage = await wbot.sendMessage(`${contact.number}@c.us`, body);
+
+        await verifyMessage(sentMessage, ticket, contact);
+        
+        // Atribui a fila mesmo fora do horário
+        await UpdateTicketService({
+          ticketData: { queueId: choosenQueue.id },
+          ticketId: ticket.id
+        });
+        
+        return;
+      }
+    }
+    
+    // Dentro do horário
     await UpdateTicketService({
       ticketData: { queueId: choosenQueue.id },
       ticketId: ticket.id
@@ -298,12 +433,75 @@ const handleMessage = async (
     )
       return;
 
-    const ticket = await FindOrCreateTicketService(
+    let ticket = await FindOrCreateTicketService(
       contact,
       wbot.id!,
       unreadMessages,
       groupContact
     );
+
+    // Validação de horário - verifica se o ticket tem fila
+    if (ticket.queueId && !msg.fromMe && !chat.isGroup) {
+      const queue = whatsapp.queues.find(q => q.id === ticket.queueId);
+
+      if (queue) {
+        // Verifica se o dia da semana permite atendimento
+        const workDayCheck = checkWorkDay(queue);
+        
+        // Se o dia NÃO está marcado, envia ausência
+        if (workDayCheck.shouldSendAbsence) {
+          // Salva a mensagem recebida do cliente
+          if (msg.hasMedia) {
+            await verifyMediaMessage(msg, ticket, contact);
+          } else {
+            await verifyMessage(msg, ticket, contact);
+          }
+          
+          // Envia a mensagem de ausência
+          if (queue.absenceMessage) {
+            const body = formatBody(`\u200e${queue.absenceMessage}\n_0 - Voltar_`, contact);
+            const sentMessage = await wbot.sendMessage(`${contact.number}@c.us`, body);
+            await verifyMessage(sentMessage, ticket, contact);
+          }
+          return;
+        }
+        
+        // Se o dia está marcado, verifica horário (se configurado)
+        if (queue.startWork && queue.endWork) {
+          const Hr = new Date();
+          const hh: number = Hr.getHours() * 60 * 60;
+          const mm: number = Hr.getMinutes() * 60;
+          const hora = hh + mm;
+
+          const inicio: string = queue.startWork;
+          const hhinicio = Number(inicio.split(":")[0]) * 60 * 60;
+          const mminicio = Number(inicio.split(":")[1]) * 60;
+          const horainicio = hhinicio + mminicio;
+
+          const termino: string = queue.endWork;
+          const hhtermino = Number(termino.split(":")[0]) * 60 * 60;
+          const mmtermino = Number(termino.split(":")[1]) * 60;
+          const horatermino = hhtermino + mmtermino;
+
+          if (hora < horainicio || hora > horatermino) {
+            // Salva a mensagem recebida do cliente
+            if (msg.hasMedia) {
+              await verifyMediaMessage(msg, ticket, contact);
+            } else {
+              await verifyMessage(msg, ticket, contact);
+            }
+            
+            // Envia a mensagem de ausência
+            if (queue.absenceMessage) {
+              const body = formatBody(`\u200e${queue.absenceMessage}\n_0 - Voltar_`, contact);
+              const sentMessage = await wbot.sendMessage(`${contact.number}@c.us`, body);
+              await verifyMessage(sentMessage, ticket, contact);
+            }
+            return;
+          }
+        }
+      }
+    }
 
     if (msg.hasMedia) {
       await verifyMediaMessage(msg, ticket, contact);

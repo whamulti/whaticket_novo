@@ -29,7 +29,7 @@ const UpdateTicketService = async ({
   ticketId
 }: Request): Promise<Response> => {
   const { status, userId, queueId, whatsappId } = ticketData;
-
+  
   const ticket = await ShowTicketService(ticketId);
   await SetTicketMessagesAsRead(ticket);
 
@@ -44,12 +44,20 @@ const UpdateTicketService = async ({
     await CheckContactOpenTickets(ticket.contact.id, ticket.whatsappId);
   }
 
-  await ticket.update({
-    status,
-    queueId,
-    userId
-  });
-
+  // Se o ticket está sendo fechado, remove a fila
+  if (status === "closed") {
+    await ticket.update({
+      status,
+      queueId: null,  // Remove a fila ao fechar
+      userId: null    // Remove o usuário ao fechar
+    });
+  } else {
+    await ticket.update({
+      status,
+      queueId,
+      userId
+    });
+  }
 
   if(whatsappId) {
     await ticket.update({
@@ -67,8 +75,6 @@ const UpdateTicketService = async ({
       ticketId: ticket.id
     });
   }
-
-
 
   io.to(ticket.status)
     .to("notification")

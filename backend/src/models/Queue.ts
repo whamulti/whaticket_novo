@@ -8,11 +8,11 @@ import {
   AutoIncrement,
   AllowNull,
   Unique,
-  BelongsToMany
+  BelongsToMany,
+  DataType
 } from "sequelize-typescript";
 import User from "./User";
 import UserQueue from "./UserQueue";
-
 import Whatsapp from "./Whatsapp";
 import WhatsappQueue from "./WhatsappQueue";
 
@@ -35,6 +35,39 @@ class Queue extends Model<Queue> {
 
   @Column
   greetingMessage: string;
+
+  @Column
+  startWork: string;
+
+  @Column
+  endWork: string;
+
+  @Column
+  absenceMessage: string;
+
+@Column({
+  type: DataType.TEXT,
+  get() {
+    const rawValue = (this as any).getDataValue('workDays');
+    if (!rawValue) return null;
+    if (typeof rawValue === 'string') {
+      try {
+        return JSON.parse(rawValue);
+      } catch (e) {
+        return null;
+      }
+    }
+    return rawValue;
+  },
+  set(value: any) {
+    if (value && typeof value === 'object') {
+      (this as any).setDataValue('workDays', JSON.stringify(value));
+    } else {
+      (this as any).setDataValue('workDays', value);
+    }
+  }
+})
+workDays: object;
 
   @CreatedAt
   createdAt: Date;

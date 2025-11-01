@@ -6,6 +6,10 @@ interface QueueData {
   name: string;
   color: string;
   greetingMessage?: string;
+  startWork?: string;
+  endWork?: string;
+  absenceMessage?: string;
+  workDays?: object;
 }
 
 const CreateQueueService = async (queueData: QueueData): Promise<Queue> => {
@@ -23,7 +27,6 @@ const CreateQueueService = async (queueData: QueueData): Promise<Queue> => {
             const queueWithSameName = await Queue.findOne({
               where: { name: value }
             });
-
             return !queueWithSameName;
           }
           return false;

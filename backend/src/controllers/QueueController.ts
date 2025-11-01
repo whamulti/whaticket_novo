@@ -8,29 +8,38 @@ import UpdateQueueService from "../services/QueueService/UpdateQueueService";
 
 export const index = async (req: Request, res: Response): Promise<Response> => {
   const queues = await ListQueuesService();
-
   return res.status(200).json(queues);
 };
 
 export const store = async (req: Request, res: Response): Promise<Response> => {
-  const { name, color, greetingMessage } = req.body;
-
-  const queue = await CreateQueueService({ name, color, greetingMessage });
-
+  console.log("🔍 CRIAR QUEUE - Body completo:", JSON.stringify(req.body));
+  
+  const { name, color, greetingMessage, startWork, endWork, absenceMessage, workDays } = req.body;
+  
+  console.log("🔍 workDays extraído:", workDays);
+  
+  const queue = await CreateQueueService({ 
+    name, 
+    color, 
+    greetingMessage, 
+    startWork, 
+    endWork, 
+    absenceMessage,
+    workDays 
+  });
+  
   const io = getIO();
   io.emit("queue", {
     action: "update",
     queue
   });
-
+  
   return res.status(200).json(queue);
 };
 
 export const show = async (req: Request, res: Response): Promise<Response> => {
   const { queueId } = req.params;
-
   const queue = await ShowQueueService(queueId);
-
   return res.status(200).json(queue);
 };
 
@@ -38,16 +47,17 @@ export const update = async (
   req: Request,
   res: Response
 ): Promise<Response> => {
+  console.log("🔍 UPDATE QUEUE - Body completo:", JSON.stringify(req.body));
+  
   const { queueId } = req.params;
-
   const queue = await UpdateQueueService(queueId, req.body);
-
+  
   const io = getIO();
   io.emit("queue", {
     action: "update",
     queue
   });
-
+  
   return res.status(201).json(queue);
 };
 
@@ -56,14 +66,13 @@ export const remove = async (
   res: Response
 ): Promise<Response> => {
   const { queueId } = req.params;
-
   await DeleteQueueService(queueId);
-
+  
   const io = getIO();
   io.emit("queue", {
     action: "delete",
     queueId: +queueId
   });
-
+  
   return res.status(200).send();
 };
