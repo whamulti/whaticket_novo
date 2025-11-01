@@ -1,0 +1,13 @@
+#!/bin/bash
+echo "Updating Whatsapp-web, please wait."
+
+cd backend
+rm -rf .wwebjs*
+npm r whatsapp-web.js
+npm i whatsapp-web.js
+rm -r node_modules
+npm install
+npm run build
+pm2 restart all
+
+echo "Update finished. Enjoy!"
