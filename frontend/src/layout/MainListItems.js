@@ -1,3 +1,4 @@
+root@vmi1247033:~# cat /www/wwwroot/atende/frontend/src/layout/MainListItems.js
 import React, { useContext, useEffect, useState } from "react";
 import { Link as RouterLink } from "react-router-dom";
 
@@ -78,10 +79,20 @@ const MainListItems = (props) => {
         icon={<DashboardOutlinedIcon />}
       />
       <ListItemLink
+        to="/connections"
+        primary={i18n.t("mainDrawer.listItems.connections")}
+        icon={
+          <Badge badgeContent={connectionWarning ? "!" : 0} color="error">
+            <SyncAltIcon />
+          </Badge>
+        }
+      />
+      <ListItemLink
         to="/tickets"
         primary={i18n.t("mainDrawer.listItems.tickets")}
         icon={<WhatsAppIcon />}
       />
+
       <ListItemLink
         to="/contacts"
         primary={i18n.t("mainDrawer.listItems.contacts")}
@@ -101,15 +112,6 @@ const MainListItems = (props) => {
             <ListSubheader inset>
               {i18n.t("mainDrawer.listItems.administration")}
             </ListSubheader>
-            <ListItemLink
-              to="/connections"
-              primary={i18n.t("mainDrawer.listItems.connections")}
-              icon={
-                <Badge badgeContent={connectionWarning ? "!" : 0} color="error">
-                  <SyncAltIcon />
-                </Badge>
-              }
-            />
             <ListItemLink
               to="/users"
               primary={i18n.t("mainDrawer.listItems.users")}
@@ -133,3 +135,4 @@ const MainListItems = (props) => {
 };
 
 export default MainListItems;
+root@vmi1247033:~#
