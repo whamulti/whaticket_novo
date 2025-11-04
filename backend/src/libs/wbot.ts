@@ -4,7 +4,7 @@ import { getIO } from "./socket";
 import Whatsapp from "../models/Whatsapp";
 import AppError from "../errors/AppError";
 import { logger } from "../utils/logger";
-import { handleMessage } from "../services/WbotServices/wbotMessageListener";
+import { handleMessage, wbotMessageListener } from "../services/WbotServices/wbotMessageListener";
 
 interface Session extends Client {
   id?: number;
@@ -123,6 +123,10 @@ export const initWbot = async (whatsapp: Whatsapp): Promise<Session> => {
         }
 
         wbot.sendPresenceAvailable();
+        
+        // CRÍTICO: Registra o listener de mensagens
+        wbotMessageListener(wbot);
+        
         await syncUnreadMessages(wbot);
 
         resolve(wbot);
