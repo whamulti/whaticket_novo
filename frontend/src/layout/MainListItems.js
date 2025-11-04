@@ -1,4 +1,3 @@
-root@vmi1247033:~# cat /www/wwwroot/atende/frontend/src/layout/MainListItems.js
 import React, { useContext, useEffect, useState } from "react";
 import { Link as RouterLink } from "react-router-dom";
 
@@ -135,4 +134,3 @@ const MainListItems = (props) => {
 };
 
 export default MainListItems;
-root@vmi1247033:~#
