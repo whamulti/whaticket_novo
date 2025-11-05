@@ -232,7 +232,7 @@ const LoggedInLayout = ({ children }) => {
             noWrap
             className={classes.title}
           >
-            WhaTicket
+            Biotipo4
           </Typography>
 
           <div className={classes.themeSwitchContainer}>
