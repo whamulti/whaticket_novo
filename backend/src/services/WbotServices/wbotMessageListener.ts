@@ -222,7 +222,8 @@ const verifyQueue = async (
     // Se o dia NÃO está marcado, envia ausência
     if (workDayCheck.shouldSendAbsence) {
       if (queue.absenceMessage) {
-        const body = formatBody(`\u200e${queue.absenceMessage}\n_0 - Voltar_`, contact);
+      //const body = formatBody(`\u200e${queue.absenceMessage}\n_0 - Voltar_`, contact);
+		const body = formatBody(`\u200e${queue.absenceMessage}\n_-_`, contact);
         const sentMessage = await wbot.sendMessage(`${contact.number}@c.us`, body);
         await verifyMessage(sentMessage, ticket, contact);
       }
@@ -249,7 +250,8 @@ const verifyQueue = async (
       if (hora < horainicio || hora > horatermino) {
         // Fora do horário - envia mensagem de ausência
         if (queue.absenceMessage) {
-          const body = formatBody(`\u200e${queue.absenceMessage}\n_0 - Voltar_`, contact);
+        //const body = formatBody(`\u200e${queue.absenceMessage}\n_0 - Voltar_`, contact);
+		  const body = formatBody(`\u200e${queue.absenceMessage}\n_-_`, contact);
           const sentMessage = await wbot.sendMessage(`${contact.number}@c.us`, body);
           await verifyMessage(sentMessage, ticket, contact);
         }
@@ -283,7 +285,8 @@ const verifyQueue = async (
     
     // Se o dia NÃO está marcado, envia ausência
     if (workDayCheck.shouldSendAbsence) {
-      const body = formatBody(`\u200e${choosenQueue.absenceMessage}\n_0 - Voltar_`, contact);
+    //const body = formatBody(`\u200e${choosenQueue.absenceMessage}\n_0 - Voltar_`, contact);
+	  const body = formatBody(`\u200e${choosenQueue.absenceMessage}\n_-_`, contact);
       const sentMessage = await wbot.sendMessage(`${contact.number}@c.us`, body);
       await verifyMessage(sentMessage, ticket, contact);
       return;
@@ -308,8 +311,8 @@ const verifyQueue = async (
       const horatermino = hhtermino + mmtermino;
 
       if (hora < horainicio || hora > horatermino) {
-        const body = formatBody(`\u200e${choosenQueue.absenceMessage}\n_0 - Voltar_`, contact);
-
+      //const body = formatBody(`\u200e${choosenQueue.absenceMessage}\n_0 - Voltar_`, contact);
+		const body = formatBody(`\u200e${choosenQueue.absenceMessage}\n_-_`, contact);
         const sentMessage = await wbot.sendMessage(`${contact.number}@c.us`, body);
 
         await verifyMessage(sentMessage, ticket, contact);
@@ -459,7 +462,8 @@ const handleMessage = async (
           
           // Envia a mensagem de ausência
           if (queue.absenceMessage) {
-            const body = formatBody(`\u200e${queue.absenceMessage}\n_0 - Voltar_`, contact);
+          //const body = formatBody(`\u200e${queue.absenceMessage}\n_0 - Voltar_`, contact);
+			const body = formatBody(`\u200e${queue.absenceMessage}\n_-_`, contact);
             const sentMessage = await wbot.sendMessage(`${contact.number}@c.us`, body);
             await verifyMessage(sentMessage, ticket, contact);
           }
@@ -493,7 +497,8 @@ const handleMessage = async (
             
             // Envia a mensagem de ausência
             if (queue.absenceMessage) {
-              const body = formatBody(`\u200e${queue.absenceMessage}\n_0 - Voltar_`, contact);
+            //const body = formatBody(`\u200e${queue.absenceMessage}\n_0 - Voltar_`, contact);
+			  const body = formatBody(`\u200e${queue.absenceMessage}\n_-_`, contact);
               const sentMessage = await wbot.sendMessage(`${contact.number}@c.us`, body);
               await verifyMessage(sentMessage, ticket, contact);
             }
